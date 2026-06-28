@@ -97,39 +97,37 @@ function PermissionsTab() {
             </tr>
           </thead>
           <tbody>
-            {Object.entries(grouped).map(([cat, perms]) => (
-              <>
-                <tr key={`cat-${cat}`} className="bg-secondary/40">
-                  <td
-                    colSpan={data.users.length + 1}
-                    className="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-foreground"
-                  >
-                    {CATEGORY_LABEL[cat as PermissionDef["category"]]}
+            {Object.entries(grouped).flatMap(([cat, perms]) => [
+              <tr key={`cat-${cat}`} className="bg-secondary/40">
+                <td
+                  colSpan={data.users.length + 1}
+                  className="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-foreground"
+                >
+                  {CATEGORY_LABEL[cat as PermissionDef["category"]]}
+                </td>
+              </tr>,
+              ...perms.map((p) => (
+                <tr key={p.id} className="border-t border-border">
+                  <td className="sticky start-0 z-10 bg-card px-4 py-2">
+                    <div className="font-mono text-xs text-foreground" data-ltr>
+                      {p.code}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{p.description}</div>
                   </td>
+                  {data.users.map((u) => {
+                    const state = data.matrix[u.id]?.[p.code] ?? "default_revoke";
+                    return (
+                      <td key={u.id} className="px-3 py-2 text-center">
+                        <Cell
+                          state={state}
+                          onClick={() => setEditing({ user: u, permission: p, current: state })}
+                        />
+                      </td>
+                    );
+                  })}
                 </tr>
-                {perms.map((p) => (
-                  <tr key={p.id} className="border-t border-border">
-                    <td className="sticky start-0 z-10 bg-card px-4 py-2">
-                      <div className="font-mono text-xs text-foreground" data-ltr>
-                        {p.code}
-                      </div>
-                      <div className="text-xs text-muted-foreground">{p.description}</div>
-                    </td>
-                    {data.users.map((u) => {
-                      const state = data.matrix[u.id]?.[p.code] ?? "default_revoke";
-                      return (
-                        <td key={u.id} className="px-3 py-2 text-center">
-                          <Cell
-                            state={state}
-                            onClick={() => setEditing({ user: u, permission: p, current: state })}
-                          />
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </>
-            ))}
+              )),
+            ])}
           </tbody>
         </table>
       </div>
